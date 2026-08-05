@@ -54,6 +54,19 @@ anywhere but local dev** — the default in `application.yml` is a placeholder.
 
 ---
 
+## Tech Stack, and Why
+
+- **Java** runs the ledger reliably
+- **Spring Boot** wires up the web server, DI container, and config
+- **Spring Security** gates every request behind auth and roles
+- **JWT** proves who you are without the server tracking sessions
+- **PostgreSQL** stores the ledger with real transactional guarantees
+- **Spring Data JPA** turns repository methods into SQL for us
+- **Docker** packages the app so it runs the same way everywhere
+- **GitHub Actions** builds and tests every push automatically
+
+---
+
 # Hamm - Secure Financial Ledger API
 
 _The following was the original implementation plan for this project; the API
