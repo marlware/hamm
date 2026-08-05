@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: hamm
+      POSTGRES_USER: hamm
+      POSTGRES_PASSWORD: hamm
+    ports:
+      - "5432:5432"
+    volumes:
+      - hamm-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hamm -d hamm"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: hamm
+      DB_USERNAME: hamm
+      DB_PASSWORD: hamm
+      JWT_SECRET: ${JWT_SECRET:-change-this-development-only-secret-please-override-in-prod-min-256-bits}
+    ports:
+      - "8080:8080"
+
+volumes:
+  hamm-db-data:
