@@ -5,7 +5,7 @@ Hamm is a secure financial ledger API that handles transactional CRUD workflows 
 
 ## Getting Started
 
-Requires Java 21, Docker, and Docker Compose.
+Requires Java 25, Docker, and Docker Compose.
 
 ```bash
 # Run the API + PostgreSQL together
