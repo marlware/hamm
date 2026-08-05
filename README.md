@@ -3,7 +3,7 @@ Hamm is a secure financial ledger API that handles transactional CRUD workflows 
 
 ---
 
-## Getting Started
+## Getting started
 
 Requires Java 25, Docker, and Docker Compose.
 
@@ -54,7 +54,7 @@ anywhere but local dev** — the default in `application.yml` is a placeholder.
 
 ---
 
-## Tech Stack, and Why
+## Tech stack
 
 - **Java** runs the ledger reliably
 - **Spring Boot** wires up the web server, DI container, and config
@@ -67,14 +67,12 @@ anywhere but local dev** — the default in `application.yml` is a placeholder.
 
 ---
 
-# Hamm - Secure Financial Ledger API
-
 _The following was the original implementation plan for this project; the API
 described above now implements it._
 
-## Project Setup
+## Project setup
 - Initialize Spring Boot project
-- Configure Java 21
+- Configure Java 25
 - Add dependencies:
   - Spring Web
   - Spring Data JPA
@@ -91,9 +89,9 @@ described above now implements it._
 
 ---
 
-## Database Design
+## Database design
 
-### Create Entities
+### Create entities
 - User
 - Role (enum)
 - Account
@@ -106,14 +104,14 @@ described above now implements it._
 - Transaction -> LedgerEntries (One-to-Many)
 - Account -> LedgerEntries (One-to-Many)
 
-### PostgreSQL Constraints
+### PostgreSQL constraints
 - Positive transaction amounts
 - Unique account numbers
 - Unique transaction reference IDs
 - Foreign keys
 - Timestamp auditing
 
-### Database Indexes
+### Database indexes
 - account_number
 - transaction_reference
 - account_id + created_at
@@ -121,9 +119,9 @@ described above now implements it._
 
 ---
 
-## Authentication & Security
+## Authentication & security
 
-### JWT Authentication
+### JWT authentication
 - User registration
 - User login
 - JWT generation
@@ -137,7 +135,7 @@ described above now implements it._
 - JWT authentication filter
 - Custom UserDetailsService
 
-### Role-Based Authorization
+### Role-based authorization
 Roles:
 - CUSTOMER
 - ACCOUNTANT
@@ -151,16 +149,16 @@ Protect endpoints using:
 
 ---
 
-## Account Management API
+## Account management API
 
 Implement endpoints:
 
-POST /api/v1/accounts
-GET /api/v1/accounts
-GET /api/v1/accounts/{id}
-PATCH /api/v1/accounts/{id}
-GET /api/v1/accounts/{id}/balance
-GET /api/v1/accounts/{id}/entries
+- POST /api/v1/accounts
+- GET /api/v1/accounts
+- GET /api/v1/accounts/{id}
+- PATCH /api/v1/accounts/{id}
+- GET /api/v1/accounts/{id}/balance
+- GET /api/v1/accounts/{id}/entries
 
 Features:
 - Create accounts
@@ -175,11 +173,11 @@ Features:
 
 Implement:
 
-POST /transactions/deposit
-POST /transactions/withdraw
-POST /transactions/transfer
-GET /transactions
-GET /transactions/{id}
+- POST /transactions/deposit
+- POST /transactions/withdraw
+- POST /transactions/transfer
+- GET /transactions
+- GET /transactions/{id}
 
 Business rules:
 - Positive amounts only
@@ -191,7 +189,7 @@ Business rules:
 
 ---
 
-## Ledger System
+## Ledger system
 
 Implement double-entry accounting.
 
@@ -212,7 +210,7 @@ Store:
 
 ---
 
-## Service Layer
+## Service layer
 
 Create services:
 
@@ -254,7 +252,7 @@ Business validation:
 
 ---
 
-## Exception Handling
+## Exception handling
 
 Create GlobalExceptionHandler.
 
@@ -302,7 +300,7 @@ Integration tests:
 
 ---
 
-## API Documentation
+## API documentation
 
 Generate OpenAPI/Swagger docs.
 
@@ -339,7 +337,7 @@ GitHub Actions workflow:
 
 ---
 
-## Nice-to-Have Features
+## Nice-to-have features
 
 - Pagination
 - Filtering transactions
@@ -354,7 +352,7 @@ GitHub Actions workflow:
 
 ---
 
-## Suggested Project Structure
+## Suggested project structure
 
 src/main/java/com/example/hamm
 
@@ -374,7 +372,7 @@ src/main/java/com/example/hamm
 
 ---
 
-## Definition of Done
+## Definition of done
 
 - JWT authentication working
 - Role-based authorization enforced
