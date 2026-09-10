@@ -1,6 +1,8 @@
 # Hamm
 Hamm is a secure financial ledger API that handles transactional CRUD workflows with strict role-based access.
 
+<img src="/hamm.gif" alt="Hamm GIF" width="300">
+
 ---
 
 ## Getting started
