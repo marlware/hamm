@@ -3,8 +3,6 @@ Hamm is a secure financial ledger API that handles transactional CRUD workflows 
 
 <img src="/hamm.gif" alt="Hamm GIF" width="300">
 
----
-
 ## Getting started
 
 Requires Java 25, Docker, and Docker Compose.
@@ -54,8 +52,6 @@ environment variables (see `docker-compose.yml` for the full list): `DB_HOST`,
 `JWT_EXPIRATION_MS`, `SERVER_PORT`. **Set a real `JWT_SECRET` before deploying
 anywhere but local dev** — the default in `application.yml` is a placeholder.
 
----
-
 ## Tech stack
 
 - **Java** runs the ledger reliably
@@ -66,8 +62,6 @@ anywhere but local dev** — the default in `application.yml` is a placeholder.
 - **Spring Data JPA** turns repository methods into SQL for us
 - **Docker** packages the app so it runs the same way everywhere
 - **GitHub Actions** builds and tests every push automatically
-
----
 
 _The following was the original implementation plan for this project; the API
 described above now implements it._
@@ -88,8 +82,6 @@ described above now implements it._
 - Create Dockerfile
 - Create docker-compose.yml with PostgreSQL
 - Set up GitHub Actions CI pipeline
-
----
 
 ## Database design
 
@@ -119,8 +111,6 @@ described above now implements it._
 - account_id + created_at
 - created_by + created_at
 
----
-
 ## Authentication & security
 
 ### JWT authentication
@@ -149,8 +139,6 @@ Protect endpoints using:
 - Method security
 - Ownership validation
 
----
-
 ## Account management API
 
 Implement endpoints:
@@ -168,8 +156,6 @@ Features:
 - Update account metadata
 - View current balance
 - View ledger history
-
----
 
 ## Transaction API
 
@@ -210,8 +196,6 @@ Store:
 - Balance after transaction
 - Timestamp
 
----
-
 ## Service layer
 
 Create services:
@@ -234,8 +218,6 @@ TransactionService responsibilities:
 
 Use @Transactional.
 
----
-
 ## Validation
 
 Use Bean Validation annotations.
@@ -252,8 +234,6 @@ Business validation:
 - Active accounts only
 - Authorized ownership
 
----
-
 ## Exception handling
 
 Create GlobalExceptionHandler.
@@ -268,8 +248,6 @@ Handle:
 - DuplicateReferenceException
 - UnauthorizedException
 
----
-
 ## Concurrency
 
 Prevent race conditions.
@@ -278,8 +256,6 @@ Implement:
 - Pessimistic locking OR optimistic locking
 - Atomic balance updates
 - Transaction rollback on failure
-
----
 
 ## Testing
 
@@ -300,8 +276,6 @@ Integration tests:
 - Full REST API tests
 - Security tests
 
----
-
 ## API documentation
 
 Generate OpenAPI/Swagger docs.
@@ -311,8 +285,6 @@ Document:
 - Request examples
 - Response examples
 - Error responses
-
----
 
 ## Docker
 
@@ -337,8 +309,6 @@ GitHub Actions workflow:
 - Package application
 - Build Docker image
 
----
-
 ## Nice-to-have features
 
 - Pagination
@@ -351,8 +321,6 @@ GitHub Actions workflow:
 - Soft deletes for users
 - Health checks
 - Metrics with Spring Boot Actuator
-
----
 
 ## Suggested project structure
 
@@ -371,8 +339,6 @@ src/main/java/com/example/hamm
 - service/
 - controller/
 - mapper/
-
----
 
 ## Definition of done
 
