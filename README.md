@@ -131,6 +131,21 @@ GET  /api/v1/transactions/{id}
 
 Swagger UI has the full request and response details while the app is running.
 
+## Why these technologies
+
+Each tool was picked for a reason. Here's what each one does for Hamm.
+
+- **Java and Spring Boot** are a well-tested pairing for APIs where mistakes are expensive
+- **Spring Security and JWT** check who you are on every request, without the server keeping a session
+- **BCrypt** scrambles passwords, so even the database never holds a real one
+- **Spring Data JPA** lets the code work with the database without hand-writing SQL, and it handles the account locks
+- **PostgreSQL** has strong guarantees for transactions, which matters when money is moving
+- **H2** is a quick in-memory database, so most tests run without Docker
+- **Testcontainers** runs a test against a real PostgreSQL, so it matches the real thing
+- **Swagger and OpenAPI** build API docs from the code, and let you try requests in your browser
+- **Docker Compose** starts the API and its database with one command
+- **GitHub Actions** builds and tests every change automatically
+
 ## Getting started
 
 You'll need Java 25, Docker, and Docker Compose. There are two ways to run it.
