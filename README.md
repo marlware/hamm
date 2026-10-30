@@ -133,18 +133,27 @@ Swagger UI has the full request and response details while the app is running.
 
 ## Why these technologies
 
-Each tool was picked for a reason. Here's what each one does for Hamm.
+- **Java and Spring Boot** are a solid pair for APIs
+- **Spring Security and JWT** check who you are on every request
+- **BCrypt** scrambles passwords before they're stored
+- **Spring Data JPA** talks to the database without hand-written SQL
+- **PostgreSQL** is careful with transactions, which matters for money
+- **H2** is a quick in-memory database for tests
+- **Testcontainers** tests against a real PostgreSQL
+- **Swagger and OpenAPI** make API docs you can try in the browser
+- **Docker Compose** starts the API and database in one command
+- **GitHub Actions** builds and tests every change
 
-- **Java and Spring Boot** are a well-tested pairing for APIs where mistakes are expensive
-- **Spring Security and JWT** check who you are on every request, without the server keeping a session
-- **BCrypt** scrambles passwords, so even the database never holds a real one
-- **Spring Data JPA** lets the code work with the database without hand-writing SQL, and it handles the account locks
-- **PostgreSQL** has strong guarantees for transactions, which matters when money is moving
-- **H2** is a quick in-memory database, so most tests run without Docker
-- **Testcontainers** runs a test against a real PostgreSQL, so it matches the real thing
-- **Swagger and OpenAPI** build API docs from the code, and let you try requests in your browser
-- **Docker Compose** starts the API and its database with one command
-- **GitHub Actions** builds and tests every change automatically
+Here's how the pieces connect.
+
+```mermaid
+flowchart LR
+    Client["Client"] --> Security["Spring Security + JWT"]
+    Security --> API["Spring Boot API: Java"]
+    API --> JPA["Spring Data JPA"]
+    JPA --> Postgres[("PostgreSQL")]
+    Swagger["Swagger UI"] -.-> API
+```
 
 ## Getting started
 
