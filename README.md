@@ -1,23 +1,32 @@
 # Hamm
 
-Hamm is a secure financial ledger API for transactional account workflows with double-entry accounting, atomic transfers, and role-based access control.
+Secure Financial Ledger
 
 <img src="/hamm.gif" alt="Hamm GIF" width="300">
 
-## Tech stack
+## What's going on here
 
-- Java 25 (backend)
-- Spring Boot (REST API)
-- Spring Security + JWT (authentication and authorization)
-- Spring Data JPA (persistence)
-- PostgreSQL (transactional ledger)
-- H2 (local integration testing)
-- Testcontainers (PostgreSQL integration testing)
-- Swagger / OpenAPI (API documentation)
-- Docker + Docker Compose (containerization)
-- GitHub Actions (CI)
+Hamm is the money-tracking part of a banking app. It keeps accounts, moves money between them, and writes down every move. It does this the way real accountants do, with double-entry bookkeeping. Every transfer is recorded twice, once as money leaving one account and once as money arriving in another.
 
-## Architecture
+Money code has to be careful. So Hamm is built to never lose track of a cent.
+
+- A transfer either fully happens or doesn't happen at all
+- Two people can't spend the same money at the same moment
+- Every action needs a login, and your role decides what you can do
+- Everything runs on test data, so there's no real money involved
+
+## What it can do
+
+- Register and log in, with stateless JWT login tokens
+- Create and manage accounts
+- Deposit, withdraw, and transfer money
+- Record every move in a double-entry ledger
+- Show an account's balance and its ledger history
+- Restrict access by role: customers, accountants, auditors, and admins
+- Return clear, consistent JSON errors
+- Document itself with Swagger, so you can try the API in your browser
+
+## How it fits together
 
 ```mermaid
 flowchart LR
@@ -37,26 +46,19 @@ flowchart LR
     SERVICE --> DB
 ```
 
-## Features
+## How a transfer works
 
-- JWT-based stateless authentication
-- role-based authorization for customers, accountants, auditors, and admins
-- account creation and management
-- deposits, withdrawals, and transfers
-- double-entry ledger for financial transactions
-- immutable ledger entries with reversal-based corrections
-- atomic database transactions with rollback on failure
-- account locking to prevent concurrent balance updates
-- PostgreSQL constraints and indexes
-- request and business-rule validation
-- consistent API error responses
-- Swagger/OpenAPI documentation
-- Dockerized local environment
-- automated unit and integration tests
+Say you move $50 from account A to account B. Here's the whole story.
 
-## Ledger design
-
-Hamm uses double-entry accounting. Each transfer produces corresponding debit and credit ledger entries rather than representing a transfer as a single balance mutation.
+- Hamm checks that the amount is positive
+- It checks that the two accounts are different
+- It checks that both accounts are active
+- It checks that the source account has enough money
+- It checks that the transaction reference hasn't been used before
+- It checks that you're allowed to use the source account
+- Then it locks both accounts, always in the same order, so two transfers can't deadlock each other
+- It writes a debit entry for A and a credit entry for B, and updates both balances
+- If anything fails along the way, the whole thing rolls back, and no half-finished entries are left behind
 
 ```mermaid
 flowchart LR
@@ -77,55 +79,25 @@ flowchart LR
     CREDIT --> DB
 ```
 
-Ledger entries are immutable. Corrections are represented by reversal transactions rather than modifying historical entries.
+Each ledger entry is meant to be written once and never changed. It records:
 
-A transaction records:
-
-- source and destination accounts
-- transaction reference
-- amount
-- entry type
-- resulting balance
-- timestamp
-- initiating user
+- Which transaction and account it belongs to
+- Whether it's a debit or a credit
+- The amount
+- The balance afterward
+- When it happened
 
 ## Security
 
-Hamm secures endpoints with Spring Security and JWT authentication.
+Every endpoint needs a login token, except registering and logging in. Passwords are hashed with BCrypt.
 
-### Authentication
-
-- user registration and login
-- BCrypt password hashing
-- JWT generation and validation
-- stateless authentication
-- protected endpoints by default
-
-### Authorization
-
-Roles:
-
-- `CUSTOMER`
-- `ACCOUNTANT`
-- `AUDITOR`
-- `ADMIN`
-
-Method-level authorization and ownership validation restrict access to account and transaction operations.
-
-## Transaction safety
-
-Financial operations execute inside Spring-managed database transactions.
-
-Transfers validate:
-
-- amount is positive
-- source and destination accounts differ
-- both accounts are active
-- the source account has sufficient funds
-- the transaction reference is unique
-- the requesting user is authorized
-
-Account locking prevents concurrent operations from producing inconsistent balances. Failed operations roll back without leaving partial ledger entries.
+- `CUSTOMER` can create accounts, deposit, withdraw, and transfer, but only on their own accounts
+- `ACCOUNTANT` can do the same and also update accounts
+- `ADMIN` can do all of that too
+- `AUDITOR` can look at things
+- Anyone who registers through the API becomes a `CUSTOMER`
+- That's on purpose, so nobody can make themselves an admin by signing up
+- There's no endpoint for granting the other roles yet, so for now you'd change a user's role in the database
 
 ## API
 
@@ -157,28 +129,18 @@ GET  /api/v1/transactions
 GET  /api/v1/transactions/{id}
 ```
 
-Full request and response documentation is available through Swagger UI while the application is running.
+Swagger UI has the full request and response details while the app is running.
 
 ## Getting started
 
-Requires Java 25, Docker, and Docker Compose.
+You'll need Java 25, Docker, and Docker Compose. There are two ways to run it.
 
-Run the API and PostgreSQL together:
+- Run the API and PostgreSQL together with `docker compose up --build`
+- Or start only the database with `docker compose up db`, then run the API with `./mvnw spring-boot:run`
 
-```bash
-docker compose up --build
-```
+Once it's running, you can reach these.
 
-Or run PostgreSQL separately and start the API with Maven:
-
-```bash
-docker compose up db
-./mvnw spring-boot:run
-```
-
-Once running:
-
-| Service | URL |
+| What | URL |
 |---|---|
 | API | http://localhost:8080/api/v1 |
 | Swagger UI | http://localhost:8080/swagger-ui/index.html |
@@ -186,7 +148,7 @@ Once running:
 
 ## Try it
 
-Register a user:
+First, register a user.
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/register \
@@ -194,7 +156,7 @@ curl -X POST http://localhost:8080/api/v1/auth/register \
   -d '{"email":"jane@example.com","password":"password123","fullName":"Jane Doe"}'
 ```
 
-Copy the `accessToken` from the response and create an account:
+Copy the `accessToken` from the response. Then create an account with it.
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/accounts \
@@ -203,9 +165,14 @@ curl -X POST http://localhost:8080/api/v1/accounts \
   -d '{"currency":"USD"}'
 ```
 
-## Database
+## The data
 
-The PostgreSQL data model centers around five domain concepts:
+There are four main things in the database.
+
+- `User` is a person who can log in, and has one role
+- `Account` belongs to a user and holds a balance
+- `Transaction` is one deposit, withdrawal, or transfer
+- `LedgerEntry` is one debit or credit line that belongs to a transaction and an account
 
 ```text
 User
@@ -215,107 +182,57 @@ User
             └── Transaction
 ```
 
-Core entities:
+- Account numbers and transaction references are unique
+- Amounts must be positive
+- Ledger entries are indexed by account and time, so history loads quickly
+- Tables are created automatically on startup
+- There's no migration tool yet
 
-- `User`
-- `Role`
-- `Account`
-- `Transaction`
-- `LedgerEntry`
+## Errors and validation
 
-The schema enforces constraints for:
-
-- positive transaction amounts
-- unique account numbers
-- unique transaction reference IDs
-- foreign-key relationships
-- timestamp auditing
-
-Indexes cover common account, transaction-reference, and chronological lookup patterns.
-
-## Validation and errors
-
-Requests use Bean Validation for structural validation such as required fields, positive amounts, currency codes, and description lengths.
-
-The service layer additionally enforces business rules such as account ownership, sufficient funds, active-account status, duplicate references, and self-transfer prevention.
-
-A global exception handler returns consistent JSON responses for validation, authorization, missing resources, insufficient funds, and duplicate transactions.
+- Requests are checked for things like required fields, positive amounts, and valid currency codes
+- The service layer checks the business rules, like ownership, enough funds, active accounts, duplicate references, and self-transfers
+- One global handler turns every failure into a consistent JSON response
 
 ## Testing
 
-Run the test suite:
+Run the tests with `./mvnw test`.
 
-```bash
-./mvnw test
-```
-
-Tests cover:
-
-- authentication and JWT validation
-- authorization
-- account creation
-- deposits
-- withdrawals
-- transfers
-- insufficient funds
-- validation failures
-- double-entry ledger creation
-- transactional rollback
-
-H2-backed integration tests run locally without Docker.
-
-A separate Testcontainers suite runs the same workflows against a real PostgreSQL container. It automatically skips when Docker is unavailable locally and runs in CI where Docker is available.
+- Unit tests cover accounts, transactions, and JWT handling
+- Integration tests cover registering, logging in, and the transaction flows through the API
+- Those run against an in-memory H2 database, so they don't need Docker
+- A separate Testcontainers test runs a workflow against a real PostgreSQL container
+- That test skips itself when Docker isn't available, and runs in CI
 
 ## Configuration
 
-Application configuration lives in:
+Settings live in `src/main/resources/application.yml`. You can override them with environment variables.
 
-```text
-src/main/resources/application.yml
-```
+- `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`
+- `JWT_SECRET` and `JWT_EXPIRATION_MS`
+- `SERVER_PORT`
+- `docker-compose.yml` has the values Docker uses
 
-Settings can be overridden through environment variables:
-
-```text
-DB_HOST
-DB_PORT
-DB_NAME
-DB_USERNAME
-DB_PASSWORD
-JWT_SECRET
-JWT_EXPIRATION_MS
-SERVER_PORT
-```
-
-The values used by Docker Compose are defined in `docker-compose.yml`.
-
-> The default JWT secret is intended for local development only. Set a secure `JWT_SECRET` before deploying Hamm outside a local environment.
+> The default JWT secret is for local development only. Set a secure `JWT_SECRET` before running Hamm anywhere else.
 
 ## Project structure
 
 ```text
 src/main/java/com/example/hamm/
-├── auth/
-├── account/
-├── transaction/
-├── ledger/
-├── user/
-├── security/
-├── exception/
-├── config/
-├── dto/
-├── repository/
-├── service/
-├── controller/
-└── mapper/
+├── account/        accounts and their API
+├── auth/           register and login
+├── transaction/    deposits, withdrawals, and transfers
+├── ledger/         double-entry ledger entries
+├── user/           users and roles
+├── security/       JWT and Spring Security setup
+├── exception/      custom errors and the global handler
+├── config/         auditing and Swagger setup
+└── common/         shared base classes
 ```
 
-## CI
+## Good to know
 
-GitHub Actions automatically:
-
-- builds the project
-- runs unit tests
-- runs PostgreSQL integration tests
-- packages the application
-- builds the Docker image
+- Reversing a transaction isn't built yet
+- A `REVERSED` status exists for it, but there's no endpoint that does it
+- GitHub Actions builds the project, runs the tests, packages it, and builds the Docker image
+- It doesn't publish the image anywhere
