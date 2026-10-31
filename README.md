@@ -144,8 +144,6 @@ Swagger UI has the full request and response details while the app is running.
 - **Docker Compose** starts the API and database in one command
 - **GitHub Actions** builds and tests every change
 
-Here's how the pieces connect.
-
 ```mermaid
 flowchart LR
     Client["Client"] --> Security["Spring Security + JWT"]
